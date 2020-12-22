@@ -1,6 +1,7 @@
 /* global: window */
 import React, {
   ReactNode,
+  useCallback,
   useEffect,
   useReducer,
   useRef,
@@ -118,13 +119,44 @@ export const Menu: React.FC<MenuProps> = ({
   const refTracker = useRefTracker();
   const [menuController] = useState(() => createMenuController());
 
+  // memoized callback for repositioning menu.
+  const reposition = useCallback(() => {
+    setState(currState => {
+      const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
+      const {
+        offsetWidth: menuWidth,
+        offsetHeight: menuHeight,
+      } = nodeRef.current!;
+      let { x, y } = currState;
+
+      if (x + menuWidth > windowWidth) {
+        x -= x + menuWidth - windowWidth;
+      }
+
+      if (y + menuHeight > windowHeight) {
+        y -= y + menuHeight - windowHeight;
+      }
+
+      return {
+        x,
+        y,
+      };
+    });
+  }, [nodeRef]);
+
   // subscribe event manager
   useEffect(() => {
     didMount.current = true;
-    eventManager.on(id, show).on(EVENT.HIDE_ALL, hide);
+    eventManager
+      .on(id, show)
+      .on(EVENT.HIDE_ALL, hide)
+      .on(EVENT.REPOSITION, reposition);
 
     return () => {
-      eventManager.off(id, show).off(EVENT.HIDE_ALL, hide);
+      eventManager
+        .off(id, show)
+        .off(EVENT.HIDE_ALL, hide)
+        .off(EVENT.REPOSITION, reposition);
     };
     // hide rely on setState(dispatch), which is guaranted to be the same across render
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,33 +180,12 @@ export const Menu: React.FC<MenuProps> = ({
     }
   }, [state.visible, menuController, refTracker]);
 
-  // compute menu position
+  // compute menu position when visibility changes
   useEffect(() => {
     if (state.visible) {
-      const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
-      const {
-        offsetWidth: menuWidth,
-        offsetHeight: menuHeight,
-      } = nodeRef.current!;
-      let { x, y } = state;
-
-      if (x + menuWidth > windowWidth) {
-        x -= x + menuWidth - windowWidth;
-      }
-
-      if (y + menuHeight > windowHeight) {
-        y -= y + menuHeight - windowHeight;
-      }
-
-      setState({
-        x,
-        y,
-      });
+      reposition();
     }
-
-    // state.visible and state{x,y} are updated together
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.visible]);
+  }, [reposition, state.visible]);
 
   // subscribe dom events
   useEffect(() => {

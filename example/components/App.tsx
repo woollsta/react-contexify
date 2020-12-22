@@ -12,6 +12,7 @@ import {
   theme as builtInTheme,
   animation as builtInAnimation,
   ItemParams,
+  contextMenu,
 } from '../../src';
 
 const selector = {
@@ -121,6 +122,10 @@ export function App() {
     });
   }
 
+  function handleRepositon() {
+    contextMenu.reposition();
+  }
+
   function getAnimation() {
     const { disableEnterAnimation, disableExitAnimation, animation } = state;
     if (!animation) {
@@ -198,6 +203,16 @@ export function App() {
               onChange={handleCheckboxes}
               data-test={DATA_TEST.TOGGLE_DISABLE_EXIT_ANIMATION}
             />
+          </li>
+          <li>
+            <label htmlFor="recomputeMenuPosition">Force recompute menu position</label>
+            <button
+              id="recomputeMenuPosition"
+              name="recomputeMenuPosition"
+              onChange={handleRepositon}
+            >
+              Reposition!
+            </button>
           </li>
         </ul>
       </section>

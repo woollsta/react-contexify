@@ -17,6 +17,7 @@ export const enum STYLE {
 
 export const enum EVENT {
   HIDE_ALL,
+  REPOSITION,
 }
 
 export const theme = {

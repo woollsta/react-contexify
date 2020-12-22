@@ -17,6 +17,7 @@ export interface ShowContextMenuParams {
 export interface ContextMenu {
   show: (params: ShowContextMenuParams) => void;
   hideAll: () => void;
+  reposition: () => void;
 }
 
 const contextMenu: ContextMenu = {
@@ -31,6 +32,9 @@ const contextMenu: ContextMenu = {
   },
   hideAll() {
     eventManager.emit(EVENT.HIDE_ALL);
+  },
+  reposition() {
+    eventManager.emit(EVENT.REPOSITION);
   },
 };
 
